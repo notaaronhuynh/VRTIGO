@@ -47,7 +47,9 @@ Just a headsup, I apologize for not commenting each code (was too focused on mak
 ## VR Systems
 VRTIGO uses a combinations of plugins. Core plug-ins for VR set up: Meta XR All-in-One SDK and Occulus XR Plugin. If there are issues with VR setup, it may be worth looking into whether these are functional via Windows > Package Manager. You may need to update these packages, but keep an eye out if any methods are changed. In General, I reccomend not changing any code directly with the VR Rigs. Try to solve your issue using the inspector before touching the code, or at least save a backup.
 
+
 All Scenes and tests have the "[BuildingBlock] Camera Rig" gameobject. This gameobject is different for every scene, based on that test's needs. For example, Finger Tapping will have hand tracking enabled, whereas Bucket Test will focus solely on controller user. You can edit the properties of this using the inspector tab. 
+
 
 **Notable Exceptions**
 - The Test of Skew uses a regular "XRRig". It doesn't necessarily integrate with Meta's OVR SDK, but we use a combination of Occulus's Rig with OVR's Eye gaze tracking. This allows us to cover each eye indepenently (something you can't do with just the OVR SDK by itself), but still record eye movement. We may need to look into this further to ensure that eye tracking is accurate using this method.
@@ -68,7 +70,11 @@ In your Heirarchy, you can find the Controller Menu gameobject as "ControllerScr
 
 **StartSystem.cs**
 In the method "Start()" we record the player name as written in and saves it so that it is consistent while switiching scenes for each tests
+
+
 In the Method "StartProcedure()" you can see the general game loop which progresses from startmenu > buckettest > TestofNystagmus > FingerTapping > TestofSkew > HeadStability. In each of these If statements, it follows a "phase" value of Tutorial, Round 1 (up to Round 3), and then Final. Please see **Test Code** for specific outlines on each tests. In each phase, we find a gameobject in the scene called "SceneCode". This is the life for each test, and is different for each scene. It basically works by Disabling and Enabling the gameobject every phase so that the code runs multiple times.
+
+
 In the method "DelaySceneCodeChange()" we change the phase value from tutorial to the different round values.
 
 ## Test Code
