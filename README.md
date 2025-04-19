@@ -130,8 +130,44 @@ Angle.text = "Angle Difference: " + normalizedAngle.ToString("F2") + "°";
 This helps maintain consistent evaluation of perceptual accuracy across all trials.
 
 
+### Test of Nystagmus
 
+The horizontal gaze nystagmus test involves moving a visual stimulus, like a finger, side to side across a patient’s field of vision to observe for involuntary, jerky eye movements. In vertigo, especially of peripheral origin like vestibular neuritis, nystagmus typically has a consistent direction and is often accompanied by dizziness. In stroke, particularly in the brainstem or cerebellum, nystagmus may change direction or be vertical, helping distinguish it from benign vertigo and signaling a potentially serious central cause. 
 
+In this test, the smiley face moves across the scene and we ask the patient to follow the smiley face without moving their head.
+
+Order of events: Test phase, record phase
+
+The smiley face in the scene is located inside the Camera Rig in the CenterEyeAnchor (this is what allows the face to move with the headset). Inside the smiley face is also the Move between two transform code. This code basically works by moving the smiley face between the all the Point Objects. So it moves all the way to the left (Point E) then all the way to the right (point B) and then loops through all the points in a "H-shape". This repeats 1 time during the test phase, and then 3 times during the actual recording phase.
+
+The scene code basically activates the Movebetweentwotransform code. It also: 
+- Tracks left and right eye rotation using OVREyeGaze
+- Tracks headset position and rotation using centerEyeAnchor
+- Logs all data to .txt files during active recording sessions
+- Organizes recordings into timestamped folders under Application.persistentDataPath
+- Enables stimulus movement via a MoveBetweenTwoTransforms component when the session is running
+- Converts all rotation data to the range [-180°, 180°]
+
+📁 Output Files
+When startMenu.recording is enabled, the script creates and writes to the following files:
+
+/TestOfNystagmus/[PlayerName]/[Timestamp]/
+├── LeftEyeRotation.txt      // Left eye X, Y, Z Euler angles
+├── RightEyeRotation.txt     // Right eye X, Y, Z Euler angles
+├── HeadPosition.txt         // Headset world position
+├── HeadRotation.txt         // Headset rotation (Euler angles)
+Each line in the files includes the current phase value from the MoveBetweenTwoTransforms script, allowing easy segmentation of data by stimulus condition.
+
+How It Works
+On OnEnable():
+- Finds the OVRCameraRig and sets centerEyeAnchor
+- Creates a session folder and initializes output file paths if recording is active
+- Enables MoveBetweenTwoTransforms if the session is running
+
+On Update():
+- Reads left/right eye rotation and headset position/rotation
+- Converts all rotations to [-180°, 180°]
+- Appends all data to their respective .txt files if recording is active
 
 ## Maintainers and Contributors
 
