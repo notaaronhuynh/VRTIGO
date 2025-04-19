@@ -93,33 +93,40 @@ Sequence of Events (as written in StartSystem.cs): Test Phase (Data is not recor
 
 Circular UI Rotation
 The circularUI GameObject represents a rotatable visual reference (the line in the middle of the bucket). The user can adjust its Z-axis rotation using the right thumbstick X-axis:
-
+```
 float joystickInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).x;
 circularUI.transform.Rotate(0f, 0f, -joystickInput * rotationSpeed * Time.deltaTime);
-
+```
 
 Adjust the speed of this rotation using the rotationSpeed variable, e.g.:
+```
 public float rotationSpeed = 50f; // Speed of rotation adjustment
-
+```
 
 Random Start Orientation: When enabled, the circularUI begins with a random Z rotation between 0° and 360°, simulating perceptual disorientation:
+```
 float randomZRotation = Random.Range(0f, 360f);
 circularUI.transform.rotation = Quaternion.Euler(0f, 0f, randomZRotation);
-
+```
 
 When startMenu.recording is true, the script logs data to a session-specific folder:
+```
 path = Path.Combine(Application.persistentDataPath, "BucketTest", StartSystem.playerName, timestamp);
+```
 Files:
 HeadPosition.txt – Logs X, Y, Z position per frame
 HeadRotation.txt – Logs Euler angles of head rotation
 BucketAngle.txt – Logs the circular UI’s normalized Z rotation (angle difference)
 
 File logging is handled in Update():
+```
 File.AppendAllText(headposfile, headsetPosition.x + ", " + headsetPosition.y + ", " + headsetPosition.z + "\n");
-
+```
 
 Angle Normalization: To simulate subjective alignment with vertical, the script normalizes the Z-rotation of circularUI into a 0–90° range:
+```
 Angle.text = "Angle Difference: " + normalizedAngle.ToString("F2") + "°";
+```
 This helps maintain consistent evaluation of perceptual accuracy across all trials.
 
 
