@@ -138,9 +138,7 @@ In this test, the smiley face moves across the scene and we ask the patient to f
 
 Order of events: Test phase, record phase
 
-The smiley face in the scene is located inside the Camera Rig in the CenterEyeAnchor (this is what allows the face to move with the headset). Inside the smiley face is also the Move between two transform code. This code basically works by moving the smiley face between the all the Point Objects. So it moves all the way to the left (Point E) then all the way to the right (point B) and then loops through all the points in a "H-shape". This repeats 1 time during the test phase, and then 3 times during the actual recording phase.
-
-The scene code basically activates the Movebetweentwotransform code. It also: 
+The **scene code** basically activates the Movebetweentwotransform code. It also: 
 - Tracks left and right eye rotation using OVREyeGaze
 - Tracks headset position and rotation using centerEyeAnchor
 - Logs all data to .txt files during active recording sessions
@@ -148,14 +146,16 @@ The scene code basically activates the Movebetweentwotransform code. It also:
 - Enables stimulus movement via a MoveBetweenTwoTransforms component when the session is running
 - Converts all rotation data to the range [-180°, 180°]
 
-📁 Output Files
+Output Files
+
 When startMenu.recording is enabled, the script creates and writes to the following files:
 
 /TestOfNystagmus/[PlayerName]/[Timestamp]/
-├── LeftEyeRotation.txt      // Left eye X, Y, Z Euler angles
-├── RightEyeRotation.txt     // Right eye X, Y, Z Euler angles
-├── HeadPosition.txt         // Headset world position
-├── HeadRotation.txt         // Headset rotation (Euler angles)
+- LeftEyeRotation.txt      // Left eye X, Y, Z Euler angles
+- RightEyeRotation.txt     // Right eye X, Y, Z Euler angles
+-  HeadPosition.txt         // Headset world position
+- HeadRotation.txt         // Headset rotation (Euler angles)
+
 Each line in the files includes the current phase value from the MoveBetweenTwoTransforms script, allowing easy segmentation of data by stimulus condition.
 
 How It Works
@@ -168,6 +168,84 @@ On Update():
 - Reads left/right eye rotation and headset position/rotation
 - Converts all rotations to [-180°, 180°]
 - Appends all data to their respective .txt files if recording is active
+
+The **MoveBetweenTwoTransform Code**
+
+The smiley face in the scene is located inside the Camera Rig in the CenterEyeAnchor (this is what allows the face to move with the headset). Inside the smiley face is also the Move between two transform code. This code basically works by moving the smiley face between the all the Point Objects. So it moves all the way to the left (Point E) then all the way to the right (point B) and then loops through all the points in a "H-shape". This repeats 1 time during the test phase, and then 3 times during the actual recording phase. You can change where the smiley face goes by adjusting these Point locations in the game space.
+```
+B → C → D → B → E → F → G → E → A (then repeat)
+```
+End Condition. Automatically stops when:
+- counter > 2 if recording
+- counter == 1 if not recording
+
+The Phase value is what is used by the scene code when its tracking the data, so that we know at which phase the smiley face is at.
+
+Each call to MoveToPoint() includes a delay: You can change how long the Sphere pauses after reaching each point by adjusting the delay parameter in each call.
+
+```
+yield return MoveToPoint(target, moveSpeed, delayInSeconds);
+```
+
+### Finger Tapping Test
+
+The finger tapping test assesses motor speed and coordination by having the patient rapidly tap their index finger and thumb together or tap their finger repeatedly against a surface. In conditions like stroke or Parkinson’s disease, finger tapping may be slowed, irregular, or diminished due to motor pathway or basal ganglia dysfunction. Impaired performance can also indicate cerebellar damage, which affects fine motor coordination and timing.
+
+Make sure you turn off the Tutorial to see the counter. Every single time the index and thumb touch, the counter should go up. 
+
+Order of events: Test phase (left hand), Record Phase (left hand then right hand)
+
+The FingerTap script tracks finger pinch gestures using OVRHand on Oculus VR devices. It counts individual finger taps during timed phases, logs data to local files, and displays real-time feedback via UI elements. This is commonly used for motor control experiments or gesture-based interaction tasks.
+
+
+Detects individual finger pinches (excluding thumbs) on either the left or right hand
+- Tracks and displays a live tap counter and countdown timer
+- Records timestamped tap events, finger name, and headset position/rotation to text files
+
+
+Supports 3 sequential phases:
+- Tutorial (Left hand, 10 seconds)
+- Round1 (Left hand, 15 seconds)
+- Round2 (Right hand, 15 seconds)
+
+The script detects pinches using:
+```
+hand.GetFingerIsPinching(finger)
+```
+Each successful pinch (excluding thumbs) increments a tap counter
+
+
+A short cooldown is applied to avoid duplicate counts:
+```
+public float pinchCooldown = 0.005f; // Adjust this to change sensitivity
+```
+
+Output Files
+When StartSystem.recording is enabled, the script writes to:
+/FingerTap/[PlayerName]/[Timestamp]/
+- FingerTapCounter.txt  // Timestamp, finger name, tap count
+- HeadPosition.txt      // X, Y, Z position of headset at each tap
+- HeadRotation.txt      // X, Y, Z Euler rotation of headset at each tap
+
+
+Each line in FingerTapCounter.txt looks like:
+```
+2025-04-19 12:45:33.456,Left-Index,23
+```
+
+recording state: phase name (e.g., "Tutorial", "Round1", "Round2")
+
+Phases are initiated in SetPhase(string newPhase), and a countdown timer is handled via a coroutine:
+```
+StartCoroutine(StartCountdown(15f)); // Round duration
+```
+You can change the duration of each phase here
+
+
+### Test of Skew
+
+
+
 
 ## Maintainers and Contributors
 
