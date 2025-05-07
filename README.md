@@ -26,7 +26,10 @@ In this motor coordination task, participants rapidly pinch their thumb and inde
 4. **Test of Skew**
 Modeled after the clinical cover-uncover test, this task alternately occludes each eye to detect vertical misalignment (skew deviation). It helps reveal disconjugate gaze patterns that may point to central nervous system involvement.
 
-5. **Head Stability Test**
+5. **Finger-to-Target Test**
+Based on a previous research study from the MAPL lab. The focus is to learn how participants focus their body to hand  
+
+6. **Head Stability Test**
 Participants fixate on a stationary virtual point in space while the VR headset captures movements in head and trunk position. Subtle sway patterns are analyzed to assess postural stability and balance control—key indicators of vestibular function.
 
 ## Setting Up the Scene/Project
@@ -244,6 +247,7 @@ You can change the duration of each phase here
 
 ### Test of Skew
 
+This test asses how each eye adjusts or compensate when a stimulus disappears from the other eye. In our system, there is a smiley face that is present in both eyes. After about 5 seconds, it disappears from the left eye, but is still present in the right eye. This reappears and then does the same for the other eye after 5 seconds. This whole cycle repeats 2 times. 
 
 
 
