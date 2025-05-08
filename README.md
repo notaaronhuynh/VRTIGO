@@ -58,6 +58,8 @@ All Scenes and tests have the "[BuildingBlock] Camera Rig" gameobject. This game
 **Notable Exceptions**
 
 - The Test of Skew uses a regular "XRRig". It doesn't necessarily integrate with Meta's OVR SDK, but we use a combination of Occulus's Rig with OVR's Eye gaze tracking. This allows us to cover each eye indepenently (something you can't do with just the OVR SDK by itself), but still record eye movement. We may need to look into this further to ensure that eye tracking is accurate using this method.
+- When you have a new scene for the game (only when you add a whole new test), you may need to build the project again while connected to the headset: File --> Build Settings --> Android --> change Run Device to the headset --> Build and Run. This will usually result in an Error but as long as it runs, then it shoudl run if you run the game in Unity.
+    - **NOTE:** When you load this game into a new headset for the first time, you will need to do this
 
 ## Controller Menu
 
@@ -248,6 +250,13 @@ You can change the duration of each phase here
 ### Test of Skew
 
 This test asses how each eye adjusts or compensate when a stimulus disappears from the other eye. In our system, there is a smiley face that is present in both eyes. After about 5 seconds, it disappears from the left eye, but is still present in the right eye. This reappears and then does the same for the other eye after 5 seconds. This whole cycle repeats 2 times. 
+
+### Finger to Target
+
+This test 
+
+### Head Stability
+
 
 
 
