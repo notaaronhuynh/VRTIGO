@@ -86,7 +86,7 @@ In your Heirarchy, you can find the Controller Menu gameobject as "ControllerScr
 In the method "Start()" we record the player name as written in and saves it so that it is consistent while switiching scenes for each tests
 
 
-In the Method "StartProcedure()" you can see the general game loop which progresses from startmenu > buckettest > TestofNystagmus > FingerTapping > TestofSkew > HeadStability. In each of these If statements, it follows a "phase" value of Tutorial, Round 1 (up to Round 3), and then Final. Please see **Test Code** for specific outlines on each tests. In each phase, we find a gameobject in the scene called "SceneCode". This is the life for each test, and is different for each scene. It basically works by Disabling and Enabling the gameobject every phase so that the code runs multiple times.
+In the Method "StartProcedure()" you can see the general game loop which progresses from startmenu > buckettest > TestofNystagmus > FingerTapping > TestofSkew > FingerToTarget > HeadStability. In each of these If statements, it follows a "phase" value of Tutorial, Round 1 (up to Round 3), and then Final. Please see **Test Code** for specific outlines on each tests. In each phase, we find a gameobject in the scene called "SceneCode". This is the life for each test, and is different for each scene. It basically works by Disabling and Enabling the gameobject every phase so that the code runs multiple times.
 
 
 In the method "DelaySceneCodeChange()" we change the phase value from tutorial to the different round values.
