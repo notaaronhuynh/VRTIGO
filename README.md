@@ -1,7 +1,8 @@
 # MAPL VRTIGO README
 
 **[Overview Video and Quick Tutorial](https://youtu.be/als9t3aj5yU)**
-**[Article](https://www.library.rochester.edu/about/news/vr-emergency-department)**
+
+**[VRTIGO Article](https://www.library.rochester.edu/about/news/vr-emergency-department)**
 
 
 ## What the Project Does
@@ -282,8 +283,8 @@ Order of events: (no test phase) player looks at target --> Experimenter clicks 
 
 
 
----
 
+---
 
 ## Maintainers and Contributors
 
