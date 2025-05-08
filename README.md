@@ -1,6 +1,7 @@
 # MAPL VRTIGO README
 
 **[Overview Video and Quick Tutorial](https://youtu.be/als9t3aj5yU)**
+**[Article](https://www.library.rochester.edu/about/news/vr-emergency-department)**
 
 
 ## What the Project Does
@@ -273,7 +274,6 @@ Order of events: player chooses their dominant hand --> player reach out right i
 
 
 
-
 ### Head Stability
 
 This test focuses on determining torso sway while looking at a target. Imagine there is a dot on the wall and we want to see how a person moves when they stand or sit upstraight and just look at the target. We are using a smiley face locked in space. In addition to this, we want to observe whether this changes with how the environment changes. The 3 environment/backgrounds we are looking at are: Full black, passthrough (real world), and unity landscape scene.
@@ -282,10 +282,9 @@ Order of events: (no test phase) player looks at target --> Experimenter clicks 
 
 
 
+---
+
 
 ## Maintainers and Contributors
 
 This project is co-created by **Joshua Jones '25** and the MAPL Labs team at [University of Rochester](https://www.rochester.edu/). All content belongs to [MAPL labs](https://www.urmc.rochester.edu/labs/movement-and-plasticity-lab).
-
----
-
