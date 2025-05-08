@@ -92,6 +92,7 @@ In the method "DelaySceneCodeChange()" we change the phase value from tutorial t
 
 ## Test Code
 
+
 ### BucketTest
 The bucket test involves placing a bucket with a straight line inside over a person's head and asking them to align the line with what they perceive as vertical. This test helps assess spatial perception and can reveal signs of vertigo or vestibular dysfunction by detecting a person's perceived vertical tilt. In stroke analysis, abnormal results may indicate damage to brain regions responsible for balance and spatial orientation, helping differentiate between peripheral and central causes of dizziness.
 
@@ -136,6 +137,7 @@ Angle Normalization: To simulate subjective alignment with vertical, the script 
 Angle.text = "Angle Difference: " + normalizedAngle.ToString("F2") + "°";
 ```
 This helps maintain consistent evaluation of perceptual accuracy across all trials.
+
 
 
 ### Test of Nystagmus
@@ -195,6 +197,7 @@ Each call to MoveToPoint() includes a delay: You can change how long the Sphere 
 yield return MoveToPoint(target, moveSpeed, delayInSeconds);
 ```
 
+
 ### Finger Tapping Test
 
 The finger tapping test assesses motor speed and coordination by having the patient rapidly tap their index finger and thumb together or tap their finger repeatedly against a surface. In conditions like stroke or Parkinson’s disease, finger tapping may be slowed, irregular, or diminished due to motor pathway or basal ganglia dysfunction. Impaired performance can also indicate cerebellar damage, which affects fine motor coordination and timing.
@@ -250,6 +253,7 @@ StartCoroutine(StartCountdown(15f)); // Round duration
 You can change the duration of each phase here
 
 
+
 ### Test of Skew
 
 This test asses how each eye adjusts or compensate when a stimulus disappears from the other eye. In our system, there is a smiley face that is present in both eyes. After about 5 seconds, it disappears from the left eye, but is still present in the right eye. This reappears and then does the same for the other eye after 5 seconds. This whole cycle repeats 2 times. 
@@ -280,6 +284,7 @@ Order of events: player chooses their dominant hand --> player reach out right i
 This test focuses on determining torso sway while looking at a target. Imagine there is a dot on the wall and we want to see how a person moves when they stand or sit upstraight and just look at the target. We are using a smiley face locked in space. In addition to this, we want to observe whether this changes with how the environment changes. The 3 environment/backgrounds we are looking at are: Full black, passthrough (real world), and unity landscape scene.
 
 Order of events: (no test phase) player looks at target --> Experimenter clicks Start/Next step --> 10 seconds on full black --> 10 seconds on passthrough --> 10 seconds in landscape.
+
 
 
 
