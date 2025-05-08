@@ -269,6 +269,7 @@ In the Left Smiley Gameobject --> In properties: Layer set to LeftEyeOnly
 
 The system works by effectively enabling and disabling the corresponding smiley gameobject based on which eye is supposed to be visible.
 
+Output Files:
 
 
 ### Finger to Target
@@ -276,6 +277,14 @@ The system works by effectively enabling and disabling the corresponding smiley 
 This test is built to asses one's mind to body perception. Randomly, the user can see or wont see their hand and target. They are then asked to reach out to a point in space represetned by the target. This test is used to assess dysmetria and spatial coordination in space.
 
 Order of events: player chooses their dominant hand --> player reach out right in front of them and pinches finger to determine maximum lenght --> Experimenter clicks Start/Next step --> player returns to center point (Square right in front of them) and start testing trial --> 5 targets appear one at a time in front of them after returning to center point while their hand is visible --> 5 targets appear one at a time and the player is asked to reach for them without seeing their hand or the target --> Goes into the actual recording phase --> the system randomly assigns visible or invisible inicators and does 10 trials with the dominant hand --> the system randomly assigns visible or invisible inicators and does 10 trials with the other hand
+
+Output Files:
+
+
+**Changing the Number of Trails:**
+
+
+**Changing the Distance of the targets:**
 
 
 
@@ -285,7 +294,7 @@ This test focuses on determining torso sway while looking at a target. Imagine t
 
 Order of events: (no test phase) player looks at target --> Experimenter clicks Start/Next step --> 10 seconds on full black --> 10 seconds on passthrough --> 10 seconds in landscape.
 
-
+Output Files:
 
 
 
