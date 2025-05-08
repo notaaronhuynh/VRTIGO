@@ -27,7 +27,7 @@ In this motor coordination task, participants rapidly pinch their thumb and inde
 Modeled after the clinical cover-uncover test, this task alternately occludes each eye to detect vertical misalignment (skew deviation). It helps reveal disconjugate gaze patterns that may point to central nervous system involvement.
 
 5. **Finger-to-Target Test**
-Based on a previous research study from the MAPL lab. The focus is to learn how participants focus their body to hand  
+Based on a previous research study from the MAPL lab. The focus is to learn how participants focus their body to hand perception and assess dysmetria and spatial coordination in space
 
 6. **Head Stability Test**
 Participants fixate on a stationary virtual point in space while the VR headset captures movements in head and trunk position. Subtle sway patterns are analyzed to assess postural stability and balance control—key indicators of vestibular function.
@@ -60,7 +60,7 @@ All Scenes and tests have the "[BuildingBlock] Camera Rig" gameobject. This game
 **Notable Exceptions**
 
 - The Test of Skew uses a regular "XRRig". It doesn't necessarily integrate with Meta's OVR SDK, but we use a combination of Occulus's Rig with OVR's Eye gaze tracking. This allows us to cover each eye indepenently (something you can't do with just the OVR SDK by itself), but still record eye movement. We may need to look into this further to ensure that eye tracking is accurate using this method.
-- 
+
 
 ## Controller Menu
 
@@ -142,7 +142,7 @@ The horizontal gaze nystagmus test involves moving a visual stimulus, like a fin
 
 In this test, the smiley face moves across the scene and we ask the patient to follow the smiley face without moving their head.
 
-Order of events: Test phase, record phase
+Order of events: Experimenter clicks Start/Next step ---> Test phase--> Experimenter clicks Start/Next step--> record phase
 
 The **scene code** basically activates the Movebetweentwotransform code. It also: 
 - Tracks left and right eye rotation using OVREyeGaze
@@ -199,7 +199,7 @@ The finger tapping test assesses motor speed and coordination by having the pati
 
 Make sure you turn off the Tutorial to see the counter. Every single time the index and thumb touch, the counter should go up. 
 
-Order of events: Test phase (left hand), Record Phase (left hand then right hand)
+Order of events: Experimenter clicks Start/Next step --> Test phase (left hand) --> Experimenter clicks Start/Next step --> Record Phase (left hand then right hand after clicking start again)
 
 The FingerTap script tracks finger pinch gestures using OVRHand on Oculus VR devices. It counts individual finger taps during timed phases, logs data to local files, and displays real-time feedback via UI elements. This is commonly used for motor control experiments or gesture-based interaction tasks.
 
@@ -252,11 +252,33 @@ You can change the duration of each phase here
 
 This test asses how each eye adjusts or compensate when a stimulus disappears from the other eye. In our system, there is a smiley face that is present in both eyes. After about 5 seconds, it disappears from the left eye, but is still present in the right eye. This reappears and then does the same for the other eye after 5 seconds. This whole cycle repeats 2 times. 
 
+Order of events: Experimenter clicks Start/Next step --> (no test phase) Smiley Face visible in both eyes --> visible in only right eye --> visible in both --> visible in only left eye --> repeat
+
+Big Point here is that using OVR camera Rig doesn't allow you to assign specific scenes to specific eyes, so instead we are using just a regular XR rig and combining it with the OVR eye tracking to record data. How this works is that the Smiley Face present is actually 2 Smiley Face one for the left eye and one for the right eye. Each smiley face is given a mask layer for left and right and then the cameras are set to not render the other side. Here are the specific of the camera rig:
+
+In the XRRig --> Camera Offset --> LeftEyeCamera --> In properties: Target Eye set to Left --> Culling Mask set to LeftEyeOnly (Or everything but the RightEyeOnly)
+In the Left Smiley Gameobject --> In properties: Layer set to LeftEyeOnly
+
+^ Do the same with the other eye camera and the other smiley gameobject
+
+The system works by effectively enabling and disabling the corresponding smiley gameobject based on which eye is supposed to be visible.
+
+
+
 ### Finger to Target
 
-This test 
+This test is built to asses one's mind to body perception. Randomly, the user can see or wont see their hand and target. They are then asked to reach out to a point in space represetned by the target. This test is used to assess dysmetria and spatial coordination in space.
+
+Order of events: player chooses their dominant hand --> player reach out right in front of them and pinches finger to determine maximum lenght --> Experimenter clicks Start/Next step --> player returns to center point (Square right in front of them) and start testing trial --> 5 targets appear one at a time in front of them after returning to center point while their hand is visible --> 5 targets appear one at a time and the player is asked to reach for them without seeing their hand or the target --> Goes into the actual recording phase --> the system randomly assigns visible or invisible inicators and does 10 trials with the dominant hand --> the system randomly assigns visible or invisible inicators and does 10 trials with the other hand
+
+
+
 
 ### Head Stability
+
+This test focuses on determining torso sway while looking at a target. Imagine there is a dot on the wall and we want to see how a person moves when they stand or sit upstraight and just look at the target. We are using a smiley face locked in space. In addition to this, we want to observe whether this changes with how the environment changes. The 3 environment/backgrounds we are looking at are: Full black, passthrough (real world), and unity landscape scene.
+
+Order of events: (no test phase) player looks at target --> Experimenter clicks Start/Next step --> 10 seconds on full black --> 10 seconds on passthrough --> 10 seconds in landscape.
 
 
 
