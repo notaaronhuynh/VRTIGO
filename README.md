@@ -309,20 +309,166 @@ Output Files:
 This test is built to asses one's mind to body perception. Randomly, the user can see or wont see their hand and target. They are then asked to reach out to a point in space represetned by the target. This test is used to assess dysmetria and spatial coordination in space.
 
 Order of events: player chooses their dominant hand --> player reach out right in front of them and pinches finger to determine maximum lenght --> Experimenter clicks Start/Next step --> player returns to center point (Square right in front of them) and start testing trial --> 5 targets appear one at a time in front of them after returning to center point while their hand is visible --> 5 targets appear one at a time and the player is asked to reach for them without seeing their hand or the target --> Goes into the actual recording phase --> the system randomly assigns visible or invisible inicators and does 10 trials with the dominant hand --> the system randomly assigns visible or invisible inicators and does 10 trials with the other hand
+1. Hand Detection (Left or Right)
+2. Calibration Trial (Trial 1)
+3. Practice Trials (Trials 2–10) — Always with the same hand.
+4. Recorded Trials (Trials 11–20) — Randomized visibility.
+5. Switch Hands Automatically
+6. Recorded Trials (Trials 21–30) — With flipped visibility.
 
 
 In the SceneCode object, there should be a script called "FingerTargetCode"
 
 
-NOTE: at the begining of the Start() method, I identify the OVR rig's left and right hand anchors, but won't be am not using these because thier location in space is different than that of the targets which makes it confusing. Instead, I use the left and rigth hand prefabs that I manually assigned which I thought worked pretty well. The Con of using this approach over OVRs direct rig is that I cant target the tip of the index finger or specific parts of the hand.
+Key Variables
+- instructionText, trialText, visibilityText – UI elements
+- fabLeft, fabRight – Hand prefabs
+- leftBall, rightBall – Proximity detection objects
+- cube, cubeblue – Reset/start triggers
+- activeHand, activeFab – Currently used hand
+- trial, phase, calibrationComplete – Trial control
+- randomizedVisibilityList, flippedVisibilityList – Trial visibility lists
 
 
-In the update() function we want to check if handedness (the calibration for which is their dominant hand) is complete. If not then it waits till the patient reaches out their hand to the left or right and writes it to the handedness.txt file. It checks which hand by comparing the hand prefabs position to the left or right ball position. 
+Lifecycle
+- Start(): Initializes camera rig, detects hands, creates log files
+- Update(): Manages phase progression and data logging
+- RunCalibrationTrial(): Captures reach distance using a pinch gesture
+- RunPracticeTrials(): 9 unlogged visible trials with visual feedback
+- RunRecordedTrials(): 20 logged trials with randomized visibility
+- EvaluateReachAfterDelay(), EvaluateAndLogReachAfterDelay(): Measure error and log results
+- LogStandardData(), LogResetReturn(): Write per-frame and event data to files
 
 
-After Handedness is selected, the experimenter has to click "Start/Next Step" to continue the test and turn the StartMenu "Recording" variable to true (Check the section above on "Controller Menu" for more info) to proceed. Once conditions are met, the left and right balls are set false, the corresponding hand selected is set as active while the other hand is turned off to avoid any confusion in touching the targets. The Varaibles "ActiveHand" and "ActiveFab" are assigned to the the enabled hand.
+NOTE: at the begining of the **Start() **method, I identify the OVR rig's left and right hand anchors, but won't be am not using these because thier location in space is different than that of the targets which makes it confusing. Instead, I use the left and rigth hand prefabs that I manually assigned which I thought worked pretty well. The Con of using this approach over OVRs direct rig is that I cant target the tip of the index finger or specific parts of the hand. The start function also has a small bit where a list is generate dfor which trials will the hand be visible and which ones will be invisible. This will be used in determing visibility later.
 
 
+In the **Update() **function we want to check if handedness (the calibration for which is their dominant hand) is complete. If not then it waits till the patient reaches out their hand to the left or right and writes it to the handedness.txt file. It checks which hand by comparing the hand prefabs position to the left or right ball position. 
+
+
+After Handedness is selected, the experimenter has to click "Start/Next Step" to continue the test and turn the StartMenu "Recording" variable to true (Check the section above on "Controller Menu" for more info) to proceed. Once conditions are met, the left and right balls are set false, the corresponding hand selected is set as active while the other hand is turned off to avoid any confusion in touching the targets. The Varaibles "ActiveHand" and "ActiveFab" are assigned to the the enabled hand. 
+
+
+the method LogStandardData() is called in the Update() method to make sure to log head,eye, and hand data at every frame. After that, there are 3 "IF statements" if the trial number is 1, then the RunCalibrationTrial() is run. if the trial number is between 2 to 10, then its just a test phase and no data is recorded here. If the trial numbers are between 11 and 30, then the RunRecordedTrials() is run. To change the number of trials see the below section on that point.
+
+
+**RunCalibrationTrial():**
+
+This method runs the initial calibration step, where the participant reaches out and pinches with their fingers. It captures the reach distance (z-axis difference) between the hand and head, which is later used for target spawning and evaluation. Automatically triggered when trial == 1 in the Update() loop.
+
+
+Key Logic:
+
+Detects if the user is pinching with the index finger:
+```
+if (activeHand.GetFingerIsPinching(OVRHand.HandFinger.Index)) { ... }
+```
+Calculates the reach distance:
+```
+zDistance = handPos.z - headPos.z;
+```
+Only records calibration once the hand is sufficiently extended:
+```
+if (zDistance >= 0.1f && !calibrationComplete) { ... }
+```
+Enables the green reset cube after calibration, which the user must touch to begin trials:
+```
+cube.SetActive(true);
+```
+
+NOTE: If you wanted to add alternations or add an offset for shoulder distance, then this would be hte place to do it by adjusting the "reachDistance" or "shoulderOffset" variables after doing the pinch. You might need to run another form of calibration to calculate this for every person - but right now its basing the distance and location off of the headset.
+
+
+**RunPracticeTrials()**
+
+Runs trials 2–10. During these, the participant practices reaching toward a ball (visible only in trials 2–5) and triggering an effect when crossing the target z-threshold. Triggered when trial >= 2 && trial <= 10 in Update().
+
+
+Key Logic:
+
+There are 2 phases, the reaching and the resetting phase. during the reaching phase, there will be a target present which is assigned to the variable called "currentBall".
+
+Ensures the hand is visible only for the first 5 practice trials:
+```
+SetHandVisibility(trial < 6);
+```
+Detection logic for when the hand reaches beyond the ball:
+```
+if (handPos.z > currentBall.transform.position.z && !evaluating)
+```
+If true, Triggers the evaluation with a brief delay:
+```
+StartCoroutine(EvaluateReachAfterDelay(0.01f));
+```
+Once the evaluation is done, and the user returns to the cube:
+```
+if (phase == Phase.Reset) { ... }
+```
+Increments the trial and spawns a new ball. at Trial 10, set the hand visibiliyt to true and move to the recorded phase.:
+```
+trial++;
+...
+ShowRandomBall();
+```
+
+**RunRecordedTrials()**
+
+Executes the actual experiment trials (trial 11–30), logs all relevant trial data, and manages the visibility of the hand using randomized lists. Also manages switching hands at trial 21. Triggered when trial >= 11 && trial <= 30 in Update()
+
+Uses randomizedVisibilityList to determine whether the hand is visible in these trials:
+```
+if (trial >= 11 && trial <= 20) { ... }
+```
+Uses flippedVisibilityList for the second hand's visibility control
+```
+else if (trial >= 21 && trial <= 30) { ... }
+```
+Same reach detection logic as in practice (line ~483)
+```
+if (handPos.z > currentBall.transform.position.z && !evaluating) { ... }
+```
+if true, to record hand, head, eye, and error data:
+```
+StartCoroutine(EvaluateAndLogReachAfterDelay(0.01f));
+```
+in the reset phase section Switches hands right after trial 20
+```
+if (trial == 21 && !flippedHands)
+```
+This then switches the active hand fab and creates a new visibility list.
+
+
+**EvaluateReachAfterDelay(float delay)**
+Temporarily pauses input evaluation, shows a success effect if the hand reaches the ball, hides the ball, and moves to the reset phase. Used during practice trials.
+
+**EvaluateAndLogReachAfterDelay(float delay)**
+Same as EvaluateReachAfterDelay, but also logs detailed trial data (positions, error, visibility, etc.) to a file. Used during recorded trials. Explosion effects are triggered here by instatiating them from a prefab.
+
+**LogResetReturn()**
+Called when the user touches the green cube after a trial. Logs the return time, increments the trial counter, and either spawns the next ball or ends the session.
+
+
+**ShowRandomBall()**
+Randomly positions the ball in one of several preset locations for each new trial. At the beginning of each new trial (from RunPracticeTrials(), RunRecordedTrials(), and LogResetReturn()).
+
+Selects a random index and applies the shoulder offset to compute final position
+```
+int index = UnityEngine.Random.Range(0, ballPositions.Length);
+Vector3 spawnPosition = new Vector3(...);
+```
+Moves the ball and shows it
+```
+currentBall.transform.position = spawnPosition;
+currentBall.SetActive(true);
+```
+
+Trial Structure:
+| Phase             | Trial # Range | Description                                 |
+| ----------------- | ------------- | ------------------------------------------- |
+| Calibration       | 1             | Measures reach distance and shoulder offset |
+| Practice Trials   | 2–10          | Visual feedback, visible hand               |
+| Recorded Trials 1 | 11–20         | Mixed visibility (randomized), same hand    |
+| Recorded Trials 2 | 21–30         | Mixed visibility, opposite hand             |
 
 
 Output Files:
@@ -330,17 +476,124 @@ Output Files:
 - Handedness.txt     // Results on which hand they choose duing callabration
 - HeadPosition.txt    // X, Y, Z
 - HeadRotation.txt    // X, Y, Z
-- LeftHandPosition.txt    // X, Y, Z in game space recorded always. 
-- RightHandPosition.txt    // X, Y, Z in game space recorded always.
+- LeftHandPosition.txt    // X, Y, Z in game space recorded always/per frame. 
+- RightHandPosition.txt    // X, Y, Z in game space recorded always/ per frame.
 - LeftEyeRotation.txt    // X, Y, Z
 - RightEyeRotation.txt    // X, Y, Z
 - Trails.txt     // This one might be different or split into visible/invisible trails. Only writes when a target is hit (whether the reset block or the target.
                  // Time stamp, trial number, phase name, is the target/hand visible, which hand is being used, that hands position, the targets position, error %, Head position, Left                     eye rotation, right eye rotation
 
-**Changing the Number of Trails:**
-
 
 **Changing the Distance of the targets:**
+In the method "SpawnRandomSphere()" at the bottom of the code
+```
+float distance = zDistance - 0.05f; // You can remove the subtract 0.05f so that the ball just spawns exactly where the user pinched.
+```
+
+**Changing the Number of Trails:**
+
+This is a bit messy because this was done last minute, but you might want to assign a variable at the start for these numbers later on. To change the number of trails to 25 recorded reaches per arm (all changes are in the comments):
+
+Trial Structure:
+| Phase             | Trial # Range | Description                                 |
+| ----------------- | ------------- | ------------------------------------------- |
+| Calibration       | 1             | Measures reach distance and shoulder offset |
+| Practice Trials   | 2–10          | Visual feedback, visible hand               |
+| Recorded Trials 1 | 11–35         | Mixed visibility (randomized), same hand    |
+| Recorded Trials 2 | 36–60         | Mixed visibility, opposite hand             |
+
+In Start(): 
+```
+for (int i = 0; i < 5; i++) visList.Add(true); // Change 5 to 13 - creates 13 instances of visible hand
+for (int i = 0; i < 5; i++) visList.Add(false); // Change 5 to 12 - creates 12 instances of invisible hand
+```
+In Update():
+```
+if (trial == 1)
+    {
+        RunCalibrationTrial();
+    }
+    else if (trial >= 2 && trial <= 10)
+    {
+        RunPracticeTrials();
+    }
+    else if (trial >= 11 && trial <= 30) // Change 30 to 60  - will record data for total of 60 trials
+    {
+        RunRecordedTrials();
+    }
+```
+In RunRecordedTrials():
+```
+ if (trial >= 11 && trial <= 20) // Change 20 to 35
+    {
+        int visIndex = trial - 11;
+        if (visIndex >= 0 && visIndex < randomizedVisibilityList.Count)
+        {
+            SetHandVisibility(randomizedVisibilityList[visIndex]);
+        }
+    }
+    else if (trial >= 21 && trial <= 30) // Change 21 to 36, and change 30 to 60
+    {
+        int visIndex = trial - 21; // Change 21 to 36
+        if (visIndex >= 0 && visIndex < flippedVisibilityList.Count)
+        {
+            SetHandVisibility(flippedVisibilityList[visIndex]);
+        }
+    }
+....
+    else if (phase == Phase.Reset)
+        {
+            ....
+
+                if (trial == 21 && !flippedHands) // Change 21 to 36
+                {
+                    // Flip handedness
+                    flippedHands = true;
+
+                    ....
+
+                    List<bool> visList = new List<bool>();
+                    for (int i = 0; i < 5; i++) visList.Add(true); // Change 5 to 13
+                    for (int i = 0; i < 5; i++) visList.Add(false); // Change 5 to 12
+                    System.Random rng = new System.Random();
+                    int n = visList.Count;
+
+                    ....
+
+                if (trial <= 30) // Change 30 to 60
+                {
+                    instructionText.text = $"Trial {trial}";
+
+                   ....
+                }
+            }
+
+        }
+    }
+```
+In EvaluateAndLogReachAfterDelay():
+```
+ private IEnumerator EvaluateAndLogReachAfterDelay(float delay)
+    {
+       ....
+
+        if (trial >= 11 && trial <= 30) // Change 30 to 60
+        {
+            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            ....
+
+            bool isVisible = trial <= 20 // change 20 to 35
+                    ? randomizedVisibilityList[trial - 11] 
+                    : flippedVisibilityList[trial - 21]; // change 21 to 36
+                ....
+
+    }
+```
+In LogResetReturn():
+```
+If (trial < 11 || trial > 30) return); // change 30 t0 60
+```
 
 
 
