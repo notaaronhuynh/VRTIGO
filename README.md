@@ -599,12 +599,18 @@ If (trial < 11 || trial > 30) return); // change 30 t0 60
 
 ### Head Stability
 
-This test focuses on determining torso sway while looking at a target. Imagine there is a dot on the wall and we want to see how a person moves when they stand or sit upstraight and just look at the target. We are using a smiley face locked in space. In addition to this, we want to observe whether this changes with how the environment changes. The 3 environment/backgrounds we are looking at are: Full black, passthrough (real world), and unity landscape scene.
+This test focuses on determining torso sway while looking at a target. Imagine there is a dot on the wall and we want to see how a person moves when they stand or sit upstraight and just look at the target. We are using a smiley face locked in space meanings that it doesnt move from its spot even if the patient moves their head. In addition to this, we want to observe whether this changes with how the environment changes. The 3 environment/backgrounds we are looking at are: Full black, passthrough (real world), and unity landscape scene.
 
 Order of events: (no test phase) player looks at target --> Experimenter clicks Start/Next step --> 10 seconds on full black --> 10 seconds on passthrough --> 10 seconds in landscape.
 
-Output Files:
+There is code called "CameraBackgroundChanger" is in the SceneCode gameobject which handles the background changing adn the data recording. the Update() methods waits till running and recording are set active in the StartMenu (done by click "Start/Next Step") then changes the background every 10 seconds by changing the camera's background color and clearflags. The main camera is the centerEyeAnchor. 
 
+Output Files:
+/HeadStability/[PlayerName]/[Timestamp]/
+- HeadPosition.txt    // X, Y, Z
+- HeadRotation.txt    // X, Y, Z
+- LeftEyeRotation.txt    // X, Y, Z
+- RightEyeRotation.txt    // X, Y, Z
 
 
 ---
