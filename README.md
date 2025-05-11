@@ -81,7 +81,7 @@ The controller menu was implemented so the experimenter can control the program 
 
 In your Heirarchy, you can find the Controller Menu gameobject as "ControllerScreen. Each of the buttons inside this game object has its own code associated with its function. The core code that controls the progrssion of the test is in the "Start" button and called "StartSystem.cs". 
 
-**StartSystem.cs**
+**StartSystem.cs** --> MAIN MANAGEMENT CODE FOR ALL THE TESTS
 
 In the method "Start()" we record the player name as written in and saves it so that it is consistent while switiching scenes for each tests
 
@@ -89,7 +89,20 @@ In the method "Start()" we record the player name as written in and saves it so 
 In the Method "StartProcedure()" you can see the general game loop which progresses from startmenu > buckettest > TestofNystagmus > FingerTapping > TestofSkew > FingerToTarget > HeadStability. In each of these If statements, it follows a "phase" value of Tutorial, Round 1 (up to Round 3), and then Final. Please see **Test Code** for specific outlines on each tests. In each phase, we find a gameobject in the scene called "SceneCode". This is the life for each test, and is different for each scene. It basically works by Disabling and Enabling the gameobject every phase so that the code runs multiple times.
 
 
+The Update() method just changes the color of the recording and running UIs based on the value of the variables.
+
+
 In the method "DelaySceneCodeChange()" we change the phase value from tutorial to the different round values.
+
+
+Example:
+1. At around line 50, would be the first test - the Bucket Test managment core. It first checks if "SceneCode" is present in the scene (which should either be a gameobject with the core code of each test inside of it, or parent it in some way. Then there are 3 nested "IF Statements" - these work from bottom ot top. So the first phase should always be set at Tutorial. That means the bottom of the nested if statements runs --> it sets the SceneCode object as true in that specific test, and turns the "Running" variable to True (this is usually a check that the SceneCode makes to ensure that the experimenter has pressed start. Additionally, the "Recording" variable is still set as False, so that means no data is recorded which is what we want for the tutorial or test phase while the patient gets used to the system). Lastly, we change the phase to "Round1", so that the next time the experimenter presses the "Start/Next Step" Button, the second nested "IF statement" is triggered.
+2. When the second nested if statement is triggered, it runs the DelaySceneCodeChange() function which makes sure that we disable SceneCode and then Enable it again (All the scenecode uses "OnEnable()" functions so that it resets whenever we disable and enable). We also make sure to Turn the recording variable to true BEFORE we enable the SceneCode - this is important, otherwise SceneCodes in each test still assumes that recording is false - we want to make sure that data is being recorded. Laslty, it moves phase 1 to phase 2, then to phase 3, and then to phase "Final.
+3. Step 2 repeats until Phase "Final is reached"
+4. Phase final activated the first nested "IF statement" which first resets the phase to "Tutorial (to prepare for the next test), saves the playername that we entered so we can just move it eaily, sets recording and running variables to false, and loads the next scene
+
+
+NOTE: Step 2 is the most variable - not every test needs to be recorded/reset 3 times. For example, HeadStability Test doesnt need a tutorial or test phase, so as soon as the "Start/Next Step" button is clicked, the nested if statement for phase "tutorial" is triggered --> recording and running are true, set phase to "Round1" and the scene code is set as active. The next click will make the variables off, change the phase back to "tutorial" and move to the next test. So the Above is very much dependent on the type of test and the code involved in the SceneCode. The specifics of each test can all be found below: 
 
 ## Test Code
 
@@ -127,6 +140,7 @@ Files:
 HeadPosition.txt – Logs X, Y, Z position per frame
 HeadRotation.txt – Logs Euler angles of head rotation
 BucketAngle.txt – Logs the circular UI’s normalized Z rotation (angle difference)
+TimeStamps are included in all files and in all tests.
 
 File logging is handled in Update():
 ```
@@ -268,19 +282,60 @@ In the Left Smiley Gameobject --> In properties: Layer set to LeftEyeOnly
 
 ^ Do the same with the other eye camera and the other smiley gameobject
 
-The system works by effectively enabling and disabling the corresponding smiley gameobject based on which eye is supposed to be visible.
+The system works by effectively enabling and disabling the corresponding smiley gameobject based on which eye is supposed to be visible. There should be a code called "Skew Display Rotation" located inside the SceneCode gameobject:
+
+
+LeftObject1 and RightObject2 are the "SmileyRight" and "SmileyLeft" eye each located in the coresponding camera.
+
+
+Ensures that the lefteyetracking adn righteyetracking are enabled based on the ovr camera rig, and that the startmenu recording variable is true. We create a new "phase" varaible for this test to always know which set of smiley faces are active. So the phases go in this order
+```
+Both --> LeftActive --> BothAfterLeft --> RightActive --> BothAfterRight --> None
+```
+
+In each of these pahses we just change whether the leftobject or rightoject are active and then change the activeobject/phase values.
+
 
 Output Files:
+/TestOfSkew/[PlayerName]/[Timestamp]/
+- LeftEyeRotation.txt  //  X, Y, Z rotations of left position, Active Object (which smiley face is visible)
+- RightEyeRotation.txt  // X, Y, Z rotations of right position, Active Object
+- HeadPosition.txt      // X, Y, Z position of headset at each tap, Active Object
+- HeadRotation.txt      // X, Y, Z Euler rotation of headset at each tap, Active Object
 
 
-### Finger to Target
+### Finger to Target (just a heads up this might not be completely up to date with the most recent iteration of VRTIGO)
 
 This test is built to asses one's mind to body perception. Randomly, the user can see or wont see their hand and target. They are then asked to reach out to a point in space represetned by the target. This test is used to assess dysmetria and spatial coordination in space.
 
 Order of events: player chooses their dominant hand --> player reach out right in front of them and pinches finger to determine maximum lenght --> Experimenter clicks Start/Next step --> player returns to center point (Square right in front of them) and start testing trial --> 5 targets appear one at a time in front of them after returning to center point while their hand is visible --> 5 targets appear one at a time and the player is asked to reach for them without seeing their hand or the target --> Goes into the actual recording phase --> the system randomly assigns visible or invisible inicators and does 10 trials with the dominant hand --> the system randomly assigns visible or invisible inicators and does 10 trials with the other hand
 
-Output Files:
 
+In the SceneCode object, there should be a script called "FingerTargetCode"
+
+
+NOTE: at the begining of the Start() method, I identify the OVR rig's left and right hand anchors, but won't be am not using these because thier location in space is different than that of the targets which makes it confusing. Instead, I use the left and rigth hand prefabs that I manually assigned which I thought worked pretty well. The Con of using this approach over OVRs direct rig is that I cant target the tip of the index finger or specific parts of the hand.
+
+
+In the update() function we want to check if handedness (the calibration for which is their dominant hand) is complete. If not then it waits till the patient reaches out their hand to the left or right and writes it to the handedness.txt file. It checks which hand by comparing the hand prefabs position to the left or right ball position. 
+
+
+After Handedness is selected, the experimenter has to click "Start/Next Step" to continue the test and turn the StartMenu "Recording" variable to true (Check the section above on "Controller Menu" for more info) to proceed. Once conditions are met, the left and right balls are set false, the corresponding hand selected is set as active while the other hand is turned off to avoid any confusion in touching the targets. The Varaibles "ActiveHand" and "ActiveFab" are assigned to the the enabled hand.
+
+
+
+
+Output Files:
+/VisInvisStability/[PlayerName]/[Timestamp]/
+- Handedness.txt     // Results on which hand they choose duing callabration
+- HeadPosition.txt    // X, Y, Z
+- HeadRotation.txt    // X, Y, Z
+- LeftHandPosition.txt    // X, Y, Z in game space recorded always. 
+- RightHandPosition.txt    // X, Y, Z in game space recorded always.
+- LeftEyeRotation.txt    // X, Y, Z
+- RightEyeRotation.txt    // X, Y, Z
+- Trails.txt     // This one might be different or split into visible/invisible trails. Only writes when a target is hit (whether the reset block or the target.
+                 // Time stamp, trial number, phase name, is the target/hand visible, which hand is being used, that hands position, the targets position, error %, Head position, Left                     eye rotation, right eye rotation
 
 **Changing the Number of Trails:**
 
